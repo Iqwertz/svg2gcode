@@ -2,12 +2,13 @@
 
 var fs = require('fs')
   , program = require('commander')
-  , GCanvas = require('gcanvas')
+  , GCanvas = require('../gcanvas/index.js') 
   , canvg = require("canvg");
 
 program
   .version(require('../package.json').version)
-  .usage('[options] <file ...>')
+  .usage('<file ...> [options]')
+  .option('-o, --output <file>', 'Output file', 'out.nc')
   .option('-s, --speed <number>', 'spindle speed', eval)
   .option('-f, --feed <number>', 'feed rate', eval)
   .option('-d, --depth <number>', 'z of final cut depth', eval)
@@ -16,11 +17,22 @@ program
   .option('-a, --above <number>', 'z of safe area above the work', eval)
   .option('-D, --tooldiameter <number>', 'diameter of tool', eval)
   .option('-p, --positive', 'Treat fill as positive, cutting only around the outside')
+  
 
 program.parse(process.argv);
 
-var gctx = new GCanvas();
+let generatedGcode = '';
+let outputFile = 'out2.nc';
 
+var driver = new GCanvas.GcodeDriver({
+  write: function(cmd) {
+    generatedGcode += cmd + ';\n';
+  }
+});
+
+var gctx = new GCanvas(driver);
+
+if(program.output) outputFile = program.output;
 if(program.speed) gctx.speed = program.speed;
 if(program.feed) gctx.feed = program.feed;
 if(program.depth) gctx.depth = program.depth;
@@ -39,11 +51,16 @@ if(program.positive) {
   }
 }
 
+gctx.toolDiameter = 0.25;
 
 function run(file) {
   var svg = ''+fs.readFileSync(file);
   canvg(gctx.canvas, svg);
-  console.log('M30');
+  generatedGcode += 'M30;\n';
+
+  fs.writeFileSync(outputFile, generatedGcode);
+  console.log('Generated Gcode File: ' + outputFile);
+  process.exit(0);
 }
 
 if(program.args.length === 0 && process.stdin.isTTY) {
@@ -64,6 +81,3 @@ if(program.top > 0) {
 else {
   gctx.motion.retract();
 }
-
-
-// process.exit(0);
