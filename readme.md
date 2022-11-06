@@ -6,6 +6,7 @@ This code was modified by Iqwertz to be a module for Depictor.
 - Gcanvas module was replaced with an fork from https://github.com/risq/gcanvas to have M3 and M5 commands
   - This requires to run npm i in the ./gcanvas folder as well
 - small changes to better integrate with Depictor
+- There were a lot of problems related to dev/stdin and I don't know why, but hardcoding the path to the svg file worked. And I am too scared to change it. So yeah, if you want to use it somewhere else than Depictor, I wouldnt recommend this fork.
 
 ========
 A command line utility for converting SVG to Gcode using [Gcanvas](https://github.com/em/gcanvas) and [canvg](https://code.google.com/p/canvg/).

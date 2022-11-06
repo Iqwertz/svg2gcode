@@ -11,7 +11,7 @@ var fs = require('fs')
 
 program
   .version(require('../package.json').version)
-  .usage('<file ...> [options]')
+  .usage('[options]')
   .option('-o, --output <file>', 'Output file', 'out.nc')
   .option('-i, --image <file>', 'Folder for the preview image', '')
   .option('-s, --speed <number>', 'spindle speed', eval)
@@ -60,8 +60,8 @@ if(program.positive) {
 
 gctx.toolDiameter = 0.25;
 
-function run(file) {
-  var svg = ''+fs.readFileSync(file);
+function run() {
+  var svg = fs.readFileSync('input/image.svg', 'utf8');
   canvg(gctx.canvas, svg);
   generatedGcode += 'M30;\n';
 
@@ -69,8 +69,7 @@ function run(file) {
   console.log('Generated Gcode File: ' + outputFile);
 
   if(imgOutputFile.length > 0) {
-    console.log(imgOutputFile)
-    svg_to_png.convert(path.resolve(file), imgOutputFile, {compress: true}).then(()=>{
+    svg_to_png.convert(path.resolve('input/image.svg'), imgOutputFile, {compress: true, defaultWidth: 200, defaultHeight: 350}).then(()=>{
       console.log('Generated Image File: ' + imgOutputFile);
         process.exit(0);
     })
